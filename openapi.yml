@@ -1,0 +1,274 @@
+openapi: 3.0.1
+
+# Copiar e colar todo esse texto em https://editor.swagger.io/
+#
+# Se preferir, é possível utilizar este editor localmente utilizando o Docker:
+# docker run -d -p 80:8080 swaggerapi/swagger-editor
+#
+# Há também uma extensão para o VisualStudio Code: https://min.immo/pgShWIS
+
+info:
+  title: "API de Comentários"
+  description: "Uma API simples para um serviço anônimo de postagens estilo Twitter."
+  contact:
+    email: rafael@lins.net.br
+  license:
+    name: MIT
+    url: https://mit-license.org/
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/
+  - url: http://localhost/
+
+tags:
+  - name: "Comentários"
+    description: "Operações que controlam os comentários (criação, leitura, respostas, etc.)"
+
+paths:
+  /comentario:
+    post:
+      tags:
+        - "Comentários"
+      summary: "Cria um novo comentário"
+      operationId: "addComment"
+      requestBody:
+        description: "O comentário que será criado"
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NovoComentario"
+        required: true
+      responses:
+        "200":
+          description: "Comentário cadastrado com sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comentario"
+        "400":
+          description: "Entrada inválida (por exemplo, um campo ausente)"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroApi"
+    get:
+      tags:
+        - "Comentários"
+      description: "Retorna uma lista de comentários sempre ordenados do mais recente para o mais antigo"
+      summary: "Lista de comentários"
+      operationId: "listComment"
+      parameters:
+        - name: primeiro
+          in: query
+          description: "Índice do primeiro comentário a se retornar na lista (começa em 0)"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 0
+        - name: tamanho
+          in: query
+          description: "Tamanho máximo esperado da lista"
+          required: false
+          schema:
+            type: integer
+            format: int64
+            default: 25
+            minimum: 25
+            maximum: 500
+        - name: filhos
+          in: query
+          description: "Se a lista deve ou não trazer todos os comentários filhos (recursivamente) ou apenas 1 nível de comentários filhos."
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListaComentarios"
+  /comentario/{id}:
+    get:
+      tags:
+        - "Comentários"
+      description: "Retorna uma linha completa de comentários a partir do comentário especificado"
+      summary: "Retorna um comentário"
+      operationId: "getComment"
+      parameters:
+        - name: id
+          in: path
+          description: "ID do comentário"
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: filhos
+          in: query
+          description: "Se os filhos do comentário especificado devem ser retornados"
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        "200":
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ComentarioCompleto"
+        "404":
+          description: "O comentário especificado não existe"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroApi"
+  /comentario/{id}/votar:
+    put:
+      tags:
+        - "Comentários"
+      description: "Adiciona um voto no comentário especificado"
+      summary: "Vota em comentário"
+      operationId: "voteComment"
+      parameters:
+        - name: id
+          in: path
+          description: "ID do comentário"
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: "Sucesso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comentario"
+        "404":
+          description: "O comentário especificado não existe"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErroApi"
+
+components:
+  schemas:
+    Comentario:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Identificador único deste comentário"
+          example: 1
+        idPai:
+          type: integer
+          format: int64
+          description: "Identificador do comentário pai deste comentário (opcional)"
+          example: 123
+          nullable: true
+        texto:
+          type: string
+          maxLength: 280
+          description: "Texto do comentário"
+          example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        pontos:
+          type: integer
+          format: int64
+          description: "Quantidade de Pontos dados a este comentário"
+          example: 10
+        dataHora:
+          type: string
+          format: datetime
+          description: "Data e hora de quando o comentário foi feito"
+          example: "2022-03-04T10:20:30.456Z"
+    ComentarioCompleto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: "Identificador único deste comentário"
+          example: 1
+        idPai:
+          type: integer
+          format: int64
+          description: "Identificador do comentário pai deste comentário (opcional)"
+          example: 123
+          nullable: true
+        texto:
+          type: string
+          maxLength: 280
+          description: "Texto do comentário"
+          example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+        pontos:
+          type: integer
+          format: int64
+          description: "Quantidade de Pontos dados a este comentário"
+          example: 10
+        dataHora:
+          type: string
+          format: datetime
+          description: "Data e hora de quando o comentário foi feito"
+          example: "2022-03-04T10:20:30.456Z"
+        filhos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComentarioCompleto"
+    NovoComentario:
+      type: object
+      required:
+        - "texto"
+      properties:
+        idPai:
+          type: integer
+          format: int64
+          description: "Identificador do comentário pai deste comentário (opcional)"
+          example: 123
+          nullable: true
+        texto:
+          type: string
+          maxLength: 280
+          description: "Texto do comentário"
+          example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    ErroApi:
+      type: object
+      required:
+        - "codigo"
+        - "status"
+        - "dataHora"
+      properties:
+        codigo:
+          type: integer
+          format: int32
+          description: "Código HTTP do erro (deve ser o mesmo da resposta HTTP)"
+          example: 500
+        status:
+          type: string
+          description: "Descrição textual do status para desenvolvedores (deve ser o mesmo da resposta HTTP)"
+          example: "INTERNAL_SERVER_ERROR"
+        dataHora:
+          type: string
+          format: datetime
+          description: "Data e hora de quando o erro aconteceu"
+          example: "2022-03-04T10:20:30.456Z"
+        mensagem:
+          type: string
+          description: "Mensagem de erro apropriada para ser mostrada ao usuário (opcional)"
+          example: "Erro desconhecido no servidor. Por favor, tente novamente."
+    ListaComentarios:
+      type: object
+      properties:
+        quantidade:
+          type: integer
+          format: int32
+          description: "Quantidade de comentários de nível raíz estão presentes na lista"
+          example: 10
+        comentarios:
+          type: array
+          items:
+            $ref: "#/components/schemas/ComentarioCompleto"

@@ -4,9 +4,9 @@ import ListaComentarios from './ListaComentarios';
 
 const Conteudo = () =>
     <Container>
-        <Apresentacao/>
-        <hr/>
-        <ListaComentarios/>
+        <Apresentacao />
+        <hr />
+        <ListaComentarios />
     </Container>
 
 export default Conteudo;
