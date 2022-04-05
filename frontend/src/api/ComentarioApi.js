@@ -12,21 +12,14 @@ class ComentariosApi {
         this.baseUrl = baseUrl;
     }
 
-    delay(maximo) {
-        return new Promise((resolve) => {
-            if (maximo > 0) {
-                setTimeout(() => resolve(), maximo / 2 + Math.random() * maximo)
-            }
-            else {
-                resolve()
-            }
-        })
-    }
-
     listComment() {
         //return axios.get(this.baseUrl + "/comentario")
         return fetch(this.baseUrl + "/comentario")
             .then(response => response.json())
+    }
+
+    addComment(textoComentario) {
+        return axios.post(this.baseUrl + "/comentario", { texto: textoComentario })
     }
 }
 
