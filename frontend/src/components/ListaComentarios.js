@@ -6,6 +6,7 @@ import ComentariosApi from "../api/ComentarioApi"
 import FormControl from "react-bootstrap/FormControl"
 import Button from "react-bootstrap/Button"
 import Container from "react-bootstrap/esm/Container"
+import FormularioNovoComentario from "./FormularioNovoComentario"
 
 const MapeamentoComentario = ({ comentario }) => {
     return <a href="#" className="list-group-item list-group-item-action d-flex gap-3 py-3" aria-current="true">
@@ -25,7 +26,6 @@ const ListaComentarios = () => {
 
     const [carregandoComentarios, setCarregandoComentarios] = useState(true)
     const [comentarios, setComentarios] = useState([])
-    const [textoNovoComentario, setTextoNovoComentario] = useState("")
 
     const inicializar = () => {
         setCarregandoComentarios(true)
@@ -40,20 +40,6 @@ const ListaComentarios = () => {
             });
     }
 
-    const cadastrarNovoComentario = (evt) => {
-        evt.preventDefault();
-
-        return api.addComment(textoNovoComentario)
-            .then(response => {
-                if (response.status === 201) {
-                    inicializar().then(() => setTextoNovoComentario(""));
-                }
-                else {
-                    console.error("Recebi uma resposta INESPERADA:", response);
-                }
-            }).catch(erro => console.error("Deu ruim!", erro))
-    }
-
     useEffect(() => {
         inicializar()
     }, [])
@@ -62,24 +48,12 @@ const ListaComentarios = () => {
         <Navbar bg="light" expand="lg" className="mb-2">
             <Container>
                 <Navbar.Brand href="#">{carregandoComentarios ? 'Carregando...' : comentarios.length + " comentários"}</Navbar.Brand>
-                <Form className="d-flex" onSubmit={cadastrarNovoComentario}>
-                    <Button onClick={inicializar} className="me-2" variant="outline-info" disabled={carregandoComentarios}>Atualizar</Button>
-                    <FormControl
-                        type="text"
-                        placeholder="Novo comentário"
-                        className="me-2"
-                        aria-label="Novo comentário"
-                        value={textoNovoComentario}
-                        onChange={(evt) => setTextoNovoComentario(evt.target.value)}
-                        disabled={carregandoComentarios}
-                    />
-                    <Button type="submit" variant="outline-success" disabled={carregandoComentarios}>Comentar</Button>
-                    <Button onClick={() => setTextoNovoComentario("<limpou o texto>")} variant="outline-danger" disabled={carregandoComentarios}>Limpar</Button>
-                </Form>
+                <Button onClick={inicializar} className="me-2" variant="outline-info" disabled={carregandoComentarios}>Atualizar</Button>
+                <FormularioNovoComentario carregando={carregandoComentarios} valorPadrao="Escreva um comentário" api={api} />
             </Container>
         </Navbar>
 
-        <div className="list-group">
+        <div className="list-group mb-4">
             {
                 carregandoComentarios ?
                     <Spinner animation="border" />
