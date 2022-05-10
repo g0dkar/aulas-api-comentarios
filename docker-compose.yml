@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+  backend:
+    image: "comentario-backend"
+    ports:
+      - "3000:4000"
+    links:
+      - bancoDeDados
+  frontend:
+    image: "comentario-frontend"
+    ports:
+      - "3000:3000"
+  bancoDeDados:
+    image: "mongo"

@@ -1,6 +1,7 @@
 import express, { json, urlencoded } from 'express';
 import logger from 'morgan';
 import comentariosRouter from './routes/comentarios.js';
+import MongoDB from './persistencia/MongoDB.js';
 
 var app = express();
 
@@ -12,6 +13,8 @@ app.use("/comentario", comentariosRouter);
 
 const port = 3000;
 
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
+new MongoDB().connect().then(() => {
+    app.listen(port, () => {
+        console.log(`API rodando na porta ${port}`)
+    })
+});

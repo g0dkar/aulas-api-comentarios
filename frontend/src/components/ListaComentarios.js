@@ -32,7 +32,7 @@ const ListaComentarios = () => {
 
         return api.listComment()
             .then(listaComentarios => {
-                setComentarios(listaComentarios)
+                setComentarios(listaComentarios.comentarios)
                 setCarregandoComentarios(false)
             })
             .catch(erro => {
